@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Nine chapter demos and eleven interactive toys for a graduate course in Digital Signal Processing. Every page is a self-contained HTML file."
+    />
+    <title>DSP Interactive · Digital Signal Processing</title>
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        const saved = localStorage.getItem('dsp-theme')
+        if (saved === 'light' || saved === 'dark') {
+          document.documentElement.dataset.theme = saved
+        }
+      } catch {}
+    </script>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --panel: #f9fafb;
+        --ink: #111827;
+        --muted: #5b6472;
+        --line: #d8dde5;
+        --accent: #0072b2;
+        --radius: 16px;
+        --font: system-ui, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        color-scheme: light;
+      }
+
+      :root[data-theme='dark'] {
+        --bg: #0f1115;
+        --surface: #161a20;
+        --panel: #141920;
+        --ink: #f3f4f6;
+        --muted: #a3acb9;
+        --line: #333b47;
+        --accent: #56b4e9;
+        color-scheme: dark;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme]) {
+          --bg: #0f1115;
+          --surface: #161a20;
+          --panel: #141920;
+          --ink: #f3f4f6;
+          --muted: #a3acb9;
+          --line: #333b47;
+          --accent: #56b4e9;
+          color-scheme: dark;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(52rem 30rem at 8% -10%, rgba(0, 114, 178, 0.1), transparent 70%),
+          radial-gradient(46rem 28rem at 102% 106%, rgba(230, 159, 0, 0.12), transparent 70%),
+          var(--bg);
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: 17px;
+        line-height: 1.55;
+        transition: background-color 160ms ease, color 160ms ease;
+      }
+
+      :root[data-theme='dark'] body {
+        background:
+          radial-gradient(52rem 30rem at 8% -10%, rgba(86, 180, 233, 0.12), transparent 70%),
+          radial-gradient(46rem 28rem at 102% 106%, rgba(230, 159, 0, 0.09), transparent 70%),
+          var(--bg);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme]) body {
+          background:
+            radial-gradient(52rem 30rem at 8% -10%, rgba(86, 180, 233, 0.12), transparent 70%),
+            radial-gradient(46rem 28rem at 102% 106%, rgba(230, 159, 0, 0.09), transparent 70%),
+            var(--bg);
+        }
+      }
+
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 22px 40px;
+      }
+
+      .masthead {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px 32px;
+        align-items: start;
+        padding-bottom: 34px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 22ch;
+        margin: 0;
+        font-size: clamp(2.1rem, 4.6vw, 3.5rem);
+        font-weight: 750;
+        letter-spacing: -0.025em;
+        line-height: 1.06;
+        text-wrap: balance;
+      }
+
+      h1 em {
+        color: var(--accent);
+        font-style: normal;
+      }
+
+      .lede {
+        max-width: 62ch;
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 1.02rem;
+      }
+
+      .theme {
+        padding: 7px 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color 120ms ease, color 120ms ease;
+      }
+
+      .theme:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .section-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px 18px;
+        margin: 34px 0 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 750;
+        letter-spacing: -0.01em;
+      }
+
+      .count,
+      .wall-link {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .wall-link {
+        color: var(--accent);
+        font-weight: 650;
+        text-decoration: none;
+      }
+
+      .wall-link:hover {
+        text-decoration: underline;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+        gap: 14px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-height: 100%;
+        padding: 17px 18px 16px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-top: 4px solid var(--accent);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: inherit;
+        text-decoration: none;
+        transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+      }
+
+      .card:hover,
+      .card:focus-visible {
+        transform: translateY(-3px);
+        border-color: var(--accent);
+        box-shadow: 0 14px 30px rgba(17, 24, 39, 0.12);
+      }
+
+      :root[data-theme='dark'] .card:hover,
+      :root[data-theme='dark'] .card:focus-visible {
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+      }
+
+      .card:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
+      }
+
+      .num {
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .card h3 {
+        margin: 0;
+        font-size: 1.02rem;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+
+      .tag {
+        align-self: flex-start;
+        margin-top: 4px;
+        padding: 2px 9px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--accent) 13%, transparent);
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px 24px;
+        margin-top: 44px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      footer a {
+        color: inherit;
+      }
+
+      @media (max-width: 560px) {
+        .masthead {
+          grid-template-columns: 1fr;
+        }
+
+        .theme {
+          justify-self: start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">HUST · Digital Signal Processing</p>
+          <h1>Nine questions, <em>eleven toys</em></h1>
+          <p class="lede">
+            Each chapter demo asks one question about a signal-processing idea. The toys are where you
+            play before you answer it. Every page is a self-contained HTML file: it runs offline, makes
+            no network requests, and nothing leaves your device.
+          </p>
+        </div>
+        <button class="theme" id="theme" type="button" aria-label="Switch theme">Dark</button>
+      </header>
+
+      <section aria-labelledby="chapters">
+        <div class="section-head">
+          <h2 id="chapters">Chapter demos</h2>
+          <span class="count">9 chapters</span>
+        </div>
+        <ul class="grid">
+          <li>
+            <a class="card" href="CH-00.html" style="--accent: #0072b2">
+              <span class="num">CH-00</span>
+              <h3>Why two conclusions from the same data?</h3>
+              <p>Introduction</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-01.html" style="--accent: #e69f00">
+              <span class="num">CH-01</span>
+              <h3>Is this sampling rate enough?</h3>
+              <p>Discrete-Time Signals and Systems</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-02.html" style="--accent: #009e73">
+              <span class="num">CH-02</span>
+              <h3>Does zero-padding improve resolution?</h3>
+              <p>The Transform Domain</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-03.html" style="--accent: #d55e00">
+              <span class="num">CH-03</span>
+              <h3>What happens when a pole leaves the unit circle?</h3>
+              <p>The z-Transform</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-04.html" style="--accent: #6d28d9">
+              <span class="num">CH-04</span>
+              <h3>Does group delay change with frequency?</h3>
+              <p>LTI Systems in the Transform Domain</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-05.html" style="--accent: #cc79a7">
+              <span class="num">CH-05</span>
+              <h3>Direct form or SOS — which fails first?</h3>
+              <p>Filter Structures</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-06.html" style="--accent: #0072b2">
+              <span class="num">CH-06</span>
+              <h3>What does filtfilt cost?</h3>
+              <p>IIR Filter Design</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-07.html" style="--accent: #e69f00">
+              <span class="num">CH-07</span>
+              <h3>Which window fits the mask?</h3>
+              <p>FIR Filter Design</p>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="CH-08.html" style="--accent: #d55e00">
+              <span class="num">CH-08</span>
+              <h3>What happens beyond fixed filters?</h3>
+              <p>Advanced Topics</p>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="toys">
+        <div class="section-head">
+          <h2 id="toys">Toys</h2>
+          <a class="wall-link" href="toys/">Open the toy wall →</a>
+        </div>
+        <ul class="grid">
+          <li>
+            <a class="card" href="toys/sound-painter.html" style="--accent: #0072b2">
+              <span class="num">TOY 01</span>
+              <h3>See your voice</h3>
+              <p>Speak, whistle, or clap. The waterfall turns sound into a picture you can drag apart.</p>
+              <span class="tag">CH-02</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/block-lab.html" style="--accent: #e69f00">
+              <span class="num">TOY 02</span>
+              <h3>Inside a JPEG block</h3>
+              <p>Every JPEG is built from 8×8 blocks of cosines. Click one, then throw its coefficients away.</p>
+              <span class="tag">CH-02</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/power-detective.html" style="--accent: #d55e00">
+              <span class="num">TOY 03</span>
+              <h3>Name the fault</h3>
+              <p>One disturbance is hiding in this 50 Hz feeder. Read the waveform, spectrum, and meters — then accuse one fault.</p>
+              <span class="tag">CH-08</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/fft-machine.html" style="--accent: #6d28d9">
+              <span class="num">TOY 04</span>
+              <h3>Watch the butterflies</h3>
+              <p>The FFT is a DFT with the work reorganised. Follow every number through the pipeline.</p>
+              <span class="tag">CH-02</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/pluck-lab.html" style="--accent: #009e73">
+              <span class="num">TOY 05</span>
+              <h3>Pluck a string</h3>
+              <p>A noise burst, a delay line, and one low-pass filter. That is a guitar.</p>
+              <span class="tag">CH-05</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/convolution-flipbook.html" style="--accent: #0072b2">
+              <span class="num">TOY 06</span>
+              <h3>Slide, multiply, sum</h3>
+              <p>Convolution is a flip, a slide, and an area. Watch the output build one sample at a time.</p>
+              <span class="tag">CH-04</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/filter-draw.html" style="--accent: #cc79a7">
+              <span class="num">TOY 07</span>
+              <h3>Draw a filter</h3>
+              <p>Sketch a magnitude response. The music runs through the FIR you just drew.</p>
+              <span class="tag">CH-06 – CH-07</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/aliasing-strobe.html" style="--accent: #e69f00">
+              <span class="num">TOY 08</span>
+              <h3>The wheel that lies</h3>
+              <p>Sample a spinning wheel slowly enough and it reverses. Then hear the same trick on a tone.</p>
+              <span class="tag">CH-01</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/radar-ping.html" style="--accent: #009e73">
+              <span class="num">TOY 09</span>
+              <h3>Find the echo</h3>
+              <p>A chirp leaves, echoes come back. The matched filter turns each echo into a sharp peak.</p>
+              <span class="tag">CH-04 – CH-08</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/motor-lab.html" style="--accent: #d55e00">
+              <span class="num">TOY 10</span>
+              <h3>Read the motor's current</h3>
+              <p>Broken bars, eccentricity, and bearings leave different fingerprints. One of them hides in an envelope.</p>
+              <span class="tag">CH-08</span>
+            </a>
+          </li>
+          <li>
+            <a class="card" href="toys/fourier-epicycles.html" style="--accent: #56b4e9">
+              <span class="num">TOY 11</span>
+              <h3>Draw with circles</h3>
+              <p>Any closed drawing is a sum of rotating circles. Draw one, then watch the circles redraw it.</p>
+              <span class="tag">CH-02</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <footer>
+        <span>HUST · DSP · SEEE</span>
+        <span>
+          Mic and camera features need HTTPS or localhost. <a href="LICENSE">MIT License</a>
+        </span>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        const root = document.documentElement
+        const button = document.getElementById('theme')
+        if (!button) return
+
+        function effective() {
+          const saved = root.dataset.theme
+          if (saved === 'light' || saved === 'dark') return saved
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+
+        function label(theme) {
+          button.textContent = theme === 'dark' ? 'Light' : 'Dark'
+          button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme')
+        }
+
+        label(effective())
+
+        button.addEventListener('click', function () {
+          const next = effective() === 'dark' ? 'light' : 'dark'
+          root.dataset.theme = next
+          try {
+            localStorage.setItem('dsp-theme', next)
+          } catch {}
+          label(next)
+        })
+      })()
+    </script>
+  </body>
+</html>
